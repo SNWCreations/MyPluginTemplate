@@ -1,0 +1,4 @@
+// Change this
+group = 'snw.template'   // Group ID
+version = '1.0.0'        // Version
+// To modify project name, see settings.gradle file

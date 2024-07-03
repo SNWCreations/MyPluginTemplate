@@ -1,0 +1,7 @@
+rootProject.name = 'MyPluginTemplate'  // Change this
+
+include 'main'
+include 'nms_common'
+include 'nms_v1_20_R1'
+// Don't forget to add NMS module there when you created one
+// include 'nms_v1_XX_RX'

@@ -1,0 +1,41 @@
+plugins {
+    id 'java'
+    // Use the following magic to allow us to use variable for controlling version
+    // https://github.com/gradle/gradle/issues/1697#issuecomment-564616914
+    id("io.papermc.paperweight.userdev") version "$paperweight_version"
+}
+
+group = parent.group
+version = parent.version
+
+repositories {
+    mavenCentral()
+}
+
+def targetMinecraftVersion = "1.20.1"
+dependencies {
+    compileOnly project(":nms_common")
+    paperweight.paperDevBundle("$targetMinecraftVersion-R0.1-SNAPSHOT")
+}
+
+// this line fixed the critical issue occurred by paperweight-userdev
+// we can't let Gradle found the remapped JAR without this line!
+reobfJar.dependsOn jar
+
+def targetJavaVersion = project.java_version as int
+java {
+    def javaVersion = JavaVersion.toVersion(targetJavaVersion)
+    sourceCompatibility = javaVersion
+    targetCompatibility = javaVersion
+    if (JavaVersion.current() < javaVersion) {
+        toolchain.languageVersion = JavaLanguageVersion.of(targetJavaVersion)
+    }
+}
+
+tasks.withType(JavaCompile).configureEach {
+    options.encoding = 'UTF-8'
+
+    if (targetJavaVersion >= 10 || JavaVersion.current().isJava10Compatible()) {
+        options.release.set(targetJavaVersion)
+    }
+}

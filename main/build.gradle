@@ -1,0 +1,143 @@
+plugins {
+    id 'java'
+
+    // Utility plugin to run a Minecraft server, useful when debugging
+    // Check for updates at https://github.com/jpenilla/run-task
+    id("xyz.jpenilla.run-paper") version "2.3.0"
+
+    // A Gradle plugin that generates plugin.yml
+    // https://github.com/Minecrell/plugin-yml
+    // We don't use SpiGradle generator there
+    id 'net.minecrell.plugin-yml.bukkit' version '0.6.0'
+
+    id 'com.github.johnrengelman.shadow' version '8.1.1'
+}
+
+group = parent.group
+version = parent.version
+
+repositories {
+    mavenCentral()
+    maven {
+        name = "spigotmc-repo"
+        url = "https://hub.spigotmc.org/nexus/content/repositories/snapshots/"
+    }
+    maven {
+        name = "sonatype"
+        url = "https://oss.sonatype.org/content/groups/public/"
+    }
+    maven {
+        name = "jitpack"
+        url = "https://jitpack.io/"
+    }
+    maven {
+        name = "PaperMC"
+        url = 'https://repo.papermc.io/repository/maven-public/'
+    }
+}
+
+def mockBukkitVer = "3.9.0"
+dependencies {
+    // noinspection VulnerableLibrariesLocal
+    compileOnly "org.spigotmc:spigot-api:${project.minecraft_version}-R0.1-SNAPSHOT"
+
+    // Test dependencies
+    testImplementation 'org.mockito:mockito-core:4.11.0'
+    testImplementation "com.github.seeseemelk:MockBukkit-v${project.api_version}:${mockBukkitVer}"
+    testImplementation 'org.assertj:assertj-core:3.24.1'
+
+    // NMS
+    // Note: Don't forget to add NMS submodule
+    //  if you supported other Minecraft version as well, just like
+    // implementation project(path: ":nms_v1_XX_RX", configuration: "reobf")
+    implementation project(":nms_common") // Introduce the NMSAdapter interface
+    implementation project(path: ":nms_v1_20_R1", configuration: "reobf")
+}
+
+def targetJavaVersion = project.java_version as int
+java {
+    def javaVersion = JavaVersion.toVersion(targetJavaVersion)
+    sourceCompatibility = javaVersion
+    targetCompatibility = javaVersion
+    if (JavaVersion.current() < javaVersion) {
+        toolchain.languageVersion = JavaLanguageVersion.of(targetJavaVersion)
+    }
+}
+
+tasks.withType(JavaCompile).configureEach {
+    options.encoding = 'UTF-8'
+
+    if (targetJavaVersion >= 10 || JavaVersion.current().isJava10Compatible()) {
+        options.release.set(targetJavaVersion)
+    }
+}
+
+def mc = project.minecraft_version
+tasks {
+    runServer {
+        // Configure the Minecraft version for our task.
+        // This is the only required configuration besides applying the plugin.
+        // Your plugin's jar (or shadowJar if present) will be used automatically.
+        minecraftVersion(mc)
+        systemProperty('com.mojang.eula.agree', true)
+    }
+}
+
+shadowJar {
+    archiveBaseName = parent.name
+    archiveClassifier = ''
+
+    // Relocate your dependencies there
+    // Change this
+    // We recommended you to use the format below so ProGuard obfuscation will work correctly
+    // relocate 'xxx', "${project.plugin_package}.include.xxx"
+}
+
+bukkit {
+    // Default values can be overridden if needed
+    name = parent.name
+    version = project.version
+    description = 'This is a template plugin' // Change this
+    // website = 'https://example.com' // Change this
+    authors = ['SNWCreations'] // Change this
+    // contributors = [] // Change this
+
+    // Plugin main class (required) // Change this
+    main = "${project.plugin_package}.${project.plugin_main_class}"
+
+    // Mark plugin for supporting Folia
+    // foliaSupported = true
+
+    // API version (should be set for 1.13+)
+    apiVersion = project.api_version
+
+    // Other possible properties from plugin.yml (optional)
+    // load = 'STARTUP' // or 'POSTWORLD'
+    // depend = []
+    // softDepend = []
+    // loadBefore = []
+    // defaultPermission = 'OP' // 'TRUE', 'FALSE', 'OP' or 'NOT_OP'
+    // provides = []
+
+    // Change this
+    // permissions {
+    //     'template.*' {
+    //         children = ['testplugin.test'] // Defaults permissions to true
+    //         // You can also specify the values of the permissions
+    //         childrenMap = ['testplugin.test': false]
+    //     }
+    //     'template.test' {
+    //         description = 'Allows you to run the test command'
+    //         setDefault('OP') // 'TRUE', 'FALSE', 'OP' or 'NOT_OP'
+    //     }
+    // }
+}
+
+jar {
+    archiveBaseName = parent.name
+    archiveClassifier = 'no-shadow'
+}
+
+tasks.build {
+    dependsOn shadowJar
+}
