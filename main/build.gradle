@@ -49,8 +49,10 @@ dependencies {
     // NMS
     // Note: Don't forget to add NMS submodule
     //  if you supported other Minecraft version as well, just like
+    // compileOnly project(":nms_v1_XX_RX")
     // implementation project(path: ":nms_v1_XX_RX", configuration: "reobf")
     implementation project(":nms_common") // Introduce the NMSAdapter interface
+    compileOnly project(":nms_v1_20_R1") // Just don't let IDEA complain
     implementation project(path: ":nms_v1_20_R1", configuration: "reobf")
 }
 
