@@ -10,7 +10,7 @@ plugins {
     // We don't use SpiGradle generator there
     id 'net.minecrell.plugin-yml.bukkit' version '0.6.0'
 
-    id 'com.github.johnrengelman.shadow' version '8.1.1'
+    id 'com.gradleup.shadow' version '8.3.3'
 }
 
 group = parent.group
