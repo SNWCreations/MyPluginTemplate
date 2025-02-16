@@ -28,7 +28,7 @@ public class MyPluginTemplate extends JavaPlugin {
     public boolean isDebugBuild() {
         try {
             try (final JarFile jarFile = new JarFile(getFile())) {
-                return jarFile.getManifest().getAttributes("Dev-Build") != null;
+                return Boolean.parseBoolean(jarFile.getManifest().getMainAttributes().getValue("Dev-Build"));
             }
         } catch (IOException e) {
             getLogger().log(Level.SEVERE, "Error reading debug build attribute", e);
