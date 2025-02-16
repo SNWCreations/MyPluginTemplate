@@ -252,7 +252,7 @@ tasks.register('proguard', ProGuardTask) {
         java.lang.Object readResolve(); \
     }'
 
-    flattenpackagehierarchy 'snw.counterstrike'
+    flattenpackagehierarchy plugin_package
 
     // Items that need to be preserved;
     // typically classes that are dynamically created using Class.forName:
